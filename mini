@@ -1,0 +1,39 @@
+# -----------------------------
+# Minikube Nginx Deployment Script
+# -----------------------------
+
+# Step 1: Start Minikube
+Write-Output "Starting Minikube..."
+minikube start --driver=docker
+minikube status
+
+# Step 2: Create Nginx Deployment
+Write-Output "`nCreating Nginx deployment..."
+kubectl create deployment nginx-deploy --image=nginx
+kubectl get deployments
+
+# Step 3: Expose Deployment as NodePort Service on port 8090
+Write-Output "`nExposing Nginx service on port 8090..."
+kubectl expose deployment nginx-deploy --type=NodePort --port=80 --target-port=80
+
+# Patch service to use NodePort 8090
+kubectl patch svc nginx-deploy -p '{"spec":{"ports":[{"port":80,"targetPort":80,"nodePort":8090}]}}'
+
+# Verify Service
+kubectl get svc
+
+# Step 4: List all pods
+Write-Output "`nListing all pods..."
+kubectl get pods
+
+# Step 5: Display URL to access service
+Write-Output "`nAccess the Nginx service in your browser at:"
+Write-Output "http://localhost:8090"
+
+Write-Output "`nOptional: Use 'minikube service nginx-deploy --url' for full URL:"
+minikube service nginx-deploy --url
+
+# -----------------------------
+# Script Complete
+# -----------------------------
+Write-Output "`n✅ Minikube Nginx deployment completed."
